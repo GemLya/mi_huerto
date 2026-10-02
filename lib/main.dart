@@ -10,7 +10,34 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+      home: HuertoPage(),
+    );
+  }
+}
+
+class HuertoPage extends StatelessWidget { 
+  const HuertoPage({super.key});
+
+  @override
+  State<HuertoPage> createState() => _HuertoPageState();
+}
+
+class _HuertoPageState extends State<HuertoPage> {
+  final controller = TextEditingController();
+  final List<String> cultivos= [];
+
+  void agregar(){
+    final texto = controller.text.trim();
+    if (texto.isEmpty) return;
+    setState(() {
+      cultivos.add(texto);
+      controller.clear();
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      
     );
   }
 }
