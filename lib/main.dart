@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MainApp());
@@ -16,8 +17,7 @@ class MainApp extends StatelessWidget {
   }
 }
 
-
-class HuertoPage extends StatefulWidget { 
+class HuertoPage extends StatefulWidget {
   const HuertoPage({super.key});
 
   @override
@@ -26,15 +26,41 @@ class HuertoPage extends StatefulWidget {
 
 class _HuertoPageState extends State<HuertoPage> {
   final controller = TextEditingController();
-  final List<String> cultivos = [];
+  List<String> cultivos = [];
 
-  void agregar() {
+  @override
+  void initState() {
+    super.initState();
+    cargar();
+  }
+
+  Future<void> cargar() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      cultivos = prefs.getStringList('cultivos') ?? [];
+    });
+  }
+
+  Future<void> guardar() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('cultivos', cultivos);
+  }
+
+  Future<void> eliminar(int index) async {
+    setState(() => cultivos.removeAt(index));
+    await guardar();
+  }
+
+  Future<void> agregar() async {
     final texto = controller.text.trim();
     if (texto.isEmpty) return;
+
     setState(() {
       cultivos.add(texto);
       controller.clear();
     });
+
+    await guardar();
   }
 
   @override
@@ -46,9 +72,7 @@ class _HuertoPageState extends State<HuertoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Huerto'),
-      ),
+      appBar: AppBar(title: const Text('Huerto')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -61,10 +85,7 @@ class _HuertoPageState extends State<HuertoPage> {
               ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: agregar,
-              child: const Text('Guardar'),
-            ),
+            ElevatedButton(onPressed: agregar, child: const Text('Guardar')),
             const SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
@@ -72,6 +93,10 @@ class _HuertoPageState extends State<HuertoPage> {
                 itemBuilder: (_, i) => ListTile(
                   leading: const Icon(Icons.eco),
                   title: Text(cultivos[i]),
+                  trailing: IconButton(
+                    onPressed: () => eliminar(i),
+                    icon: const Icon(Icons.delete),
+                  ),
                 ),
               ),
             ),
